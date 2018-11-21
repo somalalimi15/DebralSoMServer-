@@ -158,7 +158,7 @@ client.on('message', function(message) {
 });
 
 client.on('message', message => {
-         if(message.content === prefix + "فتح") {
+         if(message.content === prefix + "قفل") {
                              if(!message.channel.guild) return message.reply('** This command only for servers**');
   
      if(!message.member.hasPermission('MANAGE_MESSAGES')) return message.reply(' **__ليس لديك صلاحيات__**');
@@ -169,7 +169,7 @@ client.on('message', message => {
                     message.reply("**تـم إغلآقق آلرومم ..**")
                 });
                   }
-      if(message.content === prefix + "قفل") {
+      if(message.content === prefix + "فتح") {
                           if(!message.channel.guild) return message.reply('** This command only for servers**');
   
      if(!message.member.hasPermission('MANAGE_MESSAGES')) return message.reply('**__ليس لديك صلاحيات__**');
