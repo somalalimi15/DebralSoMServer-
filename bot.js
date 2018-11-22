@@ -11,96 +11,6 @@ client.on('guildMemberAdd', member=> {
 
     });
 
-var dat = JSON.parse("{}");
-function forEachObject(obj, func) {
-    Object.keys(obj).forEach(function (key) { func(key, obj[key]) })
-}
-client.on("ready", () => {
-    var guild;
-    while (!guild)
-        guild = client.guilds.find("name", "!!")
-    guild.fetchInvites().then((data) => {
-        data.forEach((Invite, key, map) => {
-            var Inv = Invite.code;
-            dat[Inv] = Invite.uses;
-        })
-    })
-})
-client.on("guildMemberAdd", (member) => {
-    let channel = member.guild.channels.find('name', 'debra');
-    if (!channel) {
-        console.log("!channel fails");
-        return;
-    }
-    if (member.id == client.user.id) {
-        return;
-    }
-    console.log('made it till here!');
-    var guild;
-    while (!guild)
-        guild = client.guilds.find("name", "!!")
-    guild.fetchInvites().then((data) => {
-        data.forEach((Invite, key, map) => {
-            var Inv = Invite.code;
-            if (dat[Inv])
-                if (dat[Inv] < Invite.uses) {
-                    console.log(3);
-                    console.log(`${member} joined over ${Invite.inviter}'s invite ${Invite.code}`)
- channel.send(`** Joined By : # ${Invite.inviter}   ** `)            
- }
-            dat[Inv] = Invite.uses;
-        })
-    })
-});
-
-client.on("guildMemberAdd", member => {
-  member.createDM().then(function (channel) {
-  return channel.send(`**Welcome To, Debra :sparkles: :cloud: . **.'
-   ${member}`) 
-}).catch(console.error)
-})
-
-client.on("guildMemberAdd", m => {
-    if (datediff(parseDate(moment(m.user.createdTimestamp).format('l')), parseDate(moment().format('l'))) < 30) {
-        m.ban();
-    };
-    function parseDate(str) {
-        var mdy = str.split('/');
-        return new Date(mdy[2], mdy[0]-1, mdy[1]);
-    };
-    
-    function datediff(first, second) {
-        return Math.round((second-first)/(1000*60*60*24));
-    };
-});
-
-var ss = 0;
- 
-client.on('voiceStateUpdate', (o,n) => {
-    if (o.voiceChannel && !n.voiceChannel) {
-        ss-=1
-        n.guild.channels.get("514746299229143042").edit({
-            name : "# Debra Online. : [" + ss+ "]"
-        })
-    };
-    if (n.voiceChannel && !o.voiceChannel) {
-        ss+=1
-        n.guild.channels.get("514746299229143042").edit({
-            name : "# Debra Online. : [" + ss+ "]"
-        })
-    }
-})
-client.on("ready", () => {
-    client.guilds.get("514468337582080011").members.forEach(m => {
-        if (m.voiceChannel) {
-            ss+=1
-        };
-        client.channels.get("514746299229143042").edit({
-            name : "# Debra Online. : [" + ss+ "]"
-        })
-    });
- 
-});
 
 
 client.on('message', function(message) {
@@ -181,6 +91,95 @@ client.on('message', message => {
                 });
       }
          
+});
+
+client.on('message',async message => {
+const ms = require('ms')
+    var prefix = '$' //بريفكس البوت
+  var time = moment().format('Do MMMM YYYY , hh:mm');
+  var room;
+  var title;
+  var duration;
+  var currentTime = new Date(),
+hours = currentTime.getHours() + 3 ,
+minutes = currentTime.getMinutes(),
+done = currentTime.getMinutes() + duration,
+seconds = currentTime.getSeconds();
+if (minutes < 10) {
+minutes = "0" + minutes;
+}
+var suffix = "AM";
+if (hours >= 12) {
+suffix = "PM";
+hours = hours - 12;
+}
+if (hours == 0) {
+hours = 12;
+}
+
+  var filter = m => m.author.id === message.author.id;
+  if(message.content.startsWith(prefix + "gstart")) { // الامر
+
+    if(!message.guild.member(message.author).hasPermission('MANAGE_GUILD')) return message.channel.send(':heavy_multiplication_x:| **يجب أن يكون لديك خاصية التعديل على السيرفر**');
+    message.channel.send(`:eight_pointed_black_star:| **ارسل اسم الروم**`).then(msg => {
+      message.channel.awaitMessages(filter, {
+        max: 1,
+        time: 20000,
+        errors: ['time']
+      }).then(collected => {
+        let room = message.guild.channels.find('name' , collected.first().content);
+        if(!room) return message.channel.send(':heavy_multiplication_x:| **لم استطيع ايجاد الروم :(**');
+        room = collected.first().content;
+        collected.first().delete();
+        msg.edit(':eight_pointed_black_star:| **الوقت للقيف اواي**').then(msg => {
+          message.channel.awaitMessages(filter, {
+            max: 1,
+            time: 20000,
+            errors: ['time']
+          }).then(collected => {
+            if(!collected.first().content.match(/[1-60][s,m,h,d,w]/g)) return message.channel.send('**البوت لا يدعم هذا الوقت**');
+            duration = collected.first().content
+            collected.first().delete();
+            msg.edit(':eight_pointed_black_star:| **يتم الارسال الى الروم الان **').then(msg => {
+              message.channel.awaitMessages(filter, {
+                max: 1,
+                time: 20000,
+                errors: ['time']
+              }).then(collected => {
+                title = collected.first().content;
+                collected.first().delete();
+                msg.delete();
+                message.delete();
+                try {
+                  let giveEmbed = new Discord.RichEmbed()
+                  .setDescription(`**${title}** \nReact With 🎉 To Enter! \nTime remaining : ${duration} \n **Created at :** ${hours}:${minutes}:${seconds} ${suffix}`)
+                  .setFooter(message.author.username, message.author.avatarURL);
+                  message.guild.channels.find("name" , room).send(' :heavy_check_mark: **Last Code** :heavy_check_mark:' , {embed: giveEmbed}).then(m => {
+                     let re = m.react('🎉');
+                     setTimeout(() => {
+                       let users = m.reactions.get("🎉").users
+                       let list = users.array().filter(u => u.id !== m.author.id !== client.user.id);
+                       let gFilter = list[Math.floor(Math.random() * list.length) + 0]
+                       let endEmbed = new Discord.RichEmbed()
+                       .setAuthor(message.author.username, message.author.avatarURL)
+                       .setTitle(title)
+                       .addField('Giveaway Ended !🎉',`Winners : ${gFilter} \nEnded at :`)
+                       .setTimestamp()
+					 m.edit('** 🎉 GIVEAWAY ENDED 🎉**' , {embed: endEmbed});
+					message.guild.channels.find("name" , room).send(`**Congratulations ${gFilter}! You won The \`${title}\`**` , {embed: {}})
+                }, ms(duration));
+            });
+                } catch(e) {
+                message.channel.send(`:heavy_multiplication_x:| **ليس لدي برمشن المطلوب**`);
+                  console.log(e);
+                }
+              });
+            });
+          });
+        });
+      });
+    });
+  }
 });
 
 client.login(process.env.BOT_TOKEN); 
